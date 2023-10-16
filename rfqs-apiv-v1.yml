@@ -22,15 +22,20 @@ components:
       type: object
       properties:
         id:
-          type: integer
+          type: string
+          format: uuid
         product:
           type: string
+          maxLength: 20
         quantity:
           type: integer
+          format: int32
+          minimum: 0
+          maximum: 1000
         price:
           type: number
+          minimum: 0
         shipment:
           type: string
         mode:
           type: string
-          
