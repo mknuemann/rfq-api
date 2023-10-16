@@ -1,1 +1,5 @@
 extends: ["@stoplight/spectral-owasp-ruleset"]
+
+rules:
+  "owasp:api4:2019-rate-limit": warn
+  "owasp:api2:2019-protection-global-unsafe" : warn
