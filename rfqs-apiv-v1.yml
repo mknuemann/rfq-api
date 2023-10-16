@@ -36,6 +36,7 @@ components:
         price:
           type: number
           minimum: 0
+          maximum: 2000
         shipment:
           type: string
           enum:
