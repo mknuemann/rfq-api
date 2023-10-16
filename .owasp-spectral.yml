@@ -5,7 +5,7 @@ rules:
   "owasp:api2:2019-protection-global-unsafe" : warn
   "owasp:api4:2019-string-limit":
     message: "Schema of type string must specify maxLength!"
-    description: "String size should be limited to mitigate resource exhaustion attacks.This can be done using `maxLength`."
+    description: "String size should be limited to mitigate resource exhaustion attacks. This can be done using `maxLength`."
     severity: error
     given: '$..[?(@ && @.type=="string")]'
     then:
@@ -16,7 +16,7 @@ rules:
           anyOf:
             - required: ["maxLength"]
             - required: ["enum"]
-            - required: ["const"]
+            - required: ["const"]           
             - required: 
                 format:
                   properties:
