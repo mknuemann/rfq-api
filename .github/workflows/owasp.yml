@@ -1,7 +1,7 @@
 name: OWASP Checks
 
 on:
-  - push
+  - pull_request
 
 jobs:
   Checks:
