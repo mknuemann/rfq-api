@@ -1,0 +1,17 @@
+name: Check Compatibility
+
+on:
+  - pull_request
+
+jobs:
+  Compatibility:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v4
+        with:
+          go-version: '^1.20.3'
+      - run: |
+          go install github.com/tufin/oasdiff@latest
+          oasdiff breaking -o ERR https://github.com/mknuemann/rfq-api/releases/tag/v1.0.1/rfqs-apiv-v1.yml rfqs-apiv-v1.yml
+
