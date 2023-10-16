@@ -1,0 +1,35 @@
+openapi: '3.0.2'
+info:
+  title: Quotation API
+  version: '1.0'
+servers:
+  - url: https://api.server.test/v1
+paths:
+  /rfqs:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Quotation"
+      responses:
+        '200':
+          description: OK
+components:
+  schemas:
+    Quotation:
+      type: object
+      properties:
+        id:
+          type: integer
+        product:
+          type: string
+        quantity:
+          type: integer
+        price:
+          type: number
+        shipment:
+          type: string
+        mode:
+          type: string
+          
