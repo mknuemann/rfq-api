@@ -17,7 +17,15 @@ rules:
             - required: ["maxLength"]
             - required: ["enum"]
             - required: ["const"]
-            
+            - required: ["format"]
+              properties:
+                format:
+                  type: string
+                  enum:
+                    - uuid
+                    - date
+                    - date-time
+              
   additional-properties:
     description: Additional properties must be forbidden in every object
     given: '$..[?(@ && @.type=="object")]'
