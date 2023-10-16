@@ -12,8 +12,16 @@ rules:
       function: schema
       functionOptions:
         schema:
-        type: object
-        anyOf:
-        - required: ["maxLength"]
-        - required: ["enum"]
-        - required: ["const"]
+          type: object
+          anyOf:
+            - required: ["maxLength"]
+            - required: ["enum"]
+            - required: ["const"]
+            - required: 
+                format:
+                  properties:
+                    type: string
+                    enum:
+                      - uuid
+                      - date
+                      - date-time
