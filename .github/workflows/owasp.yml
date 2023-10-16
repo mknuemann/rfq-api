@@ -1,0 +1,14 @@
+name: OWASP Checks
+
+on:
+  - push
+
+jobs:
+  Checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+      - run: npm install -g @stoplight/spectral-cli
+      - run: npm install --save -D @stoplight/spectral-owasp-ruleset
+      - run: spectral lint rfqs-apiv-v1.yml -D error
