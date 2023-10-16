@@ -7,7 +7,7 @@ servers:
 paths:
   /rfqs:
     post:
-      operationId: create-rfq
+      operationid: create-rfq
       requestBody:
         content:
           application/json:
