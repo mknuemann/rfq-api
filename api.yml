@@ -193,6 +193,7 @@ paths:
           schema:
             type: string
             maxLength: 1024
+            pattern: "[0-9,-\\w]*"
       responses:
         '200':
           description: returns a response containing array of location telemetry data for requested mawb.
@@ -235,6 +236,7 @@ paths:
           schema:
             type: string
             maxLength: 1024
+            pattern: ""
       responses:
         '200':
           description: returns a response containing invitation link
@@ -284,6 +286,7 @@ components:
             - 403: Access violation: no permission to get access to account : 12345abc-def1-1231-bcd4-e5f6a7b8c9d0
         message:
           type: string 
+          maxLength: 255
           description: message describing the error
           example: "Access violation: no permission to get access to account : 12345abc-def1-1231-bcd4-e5f6a7b8c9d0"
     ShipmentPushMessageHeader:
@@ -304,24 +307,30 @@ components:
           $ref: "#/components/schemas/ShipmentPushMessageHeader"
         subscriptions:
           type: array
+          maxItems: 100
           items:
             type: object
             properties:
               account_id:
                 type: string
+                format: uuid
                 example: '12345abc-def1-1231-bcd4-e5f6a7b8c9d0'
               subscription_reference:
                 type: string
+                format: uuid
                 description: uuid received upon subscription
                 example: 'abcdef12-73e2-4227-9a33-00a31bde3d0d'
               mawb: 
                 type: string
+                maxLength: 12
                 example: '00111111111'
               hawb: 
                 type: string
+                maxLength: 255
                 example: 'HAWB-00111111111'
               shipper: 
                 type: string
+                maxLength: 255
                 example: 'TheShipper'
               status:
                 type: number
@@ -361,6 +370,7 @@ components:
       properties:
         account_id:
           type: string
+          format: uuid
           description: uuid of your account
           example: '12345abc-def1-1231-bcd4-e5f6a7b8c9d0'
     TelemetryMovement:
@@ -368,12 +378,15 @@ components:
       properties:
         dep_iata:
           type: string
+          maxLength: 3
           example: "DUS"
         arr_iata:
           type: string
+          maxLength: 3
           example: "DUS"
         flight_no:
           type: string
+          maxLength: 10
           example: "EY12"
         mawb_flight_pieces:
           type: integer
@@ -389,6 +402,7 @@ components:
       properties:
         iata:
           type: string
+          maxLength: 3
           example: "DUS"
         position: 
           type: object
@@ -404,6 +418,7 @@ components:
       properties:
         mawb:
           type: string
+          maxLength: 12
         movements:
           type: array
           items:
@@ -437,14 +452,17 @@ components:
       properties:
         dep_iata:
           type: string
+          maxLength: 3
           description: 'Origin IATA code'
           example: 'DUS'
         arr_iata:
           type: string
+          maxLength: 3
           description: 'Destination IATA code of this movement. This may not match the final destination iata of the shipment, i.e. if shipment was routed via different airport(s).'
           example: 'DUS'
         flight_no:
           type: string
+          maxLength: 12
           description: 'Flight Number'
           example: 'EY12'
         vehicle_type:
