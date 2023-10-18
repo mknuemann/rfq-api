@@ -350,6 +350,7 @@ components:
                     * 407: SUB_UPDATE_NOT_FOUND[3] - update request was not matching any subscribed shipment
               push_types:
                 type: array
+                maxItems: 2
                 items:
                   type: string
                   enum: [SHIPMENT,TELEMETRY]
