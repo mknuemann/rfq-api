@@ -582,6 +582,7 @@ components:
           description: the calculation time of provided status
         movements:
           type: array
+          maxItems: 30
           items:
             $ref : '#/components/schemas/Movement'
     HawbInfo:
@@ -631,6 +632,7 @@ components:
           $ref: "#/components/schemas/ShipmentPushMessageHeader"
         shipments:
           type: array
+          maxItems: 1
           items:
             type: object
             properties:
@@ -643,6 +645,7 @@ components:
                     example: "2023-04-15T00:00:00Z"
               hawb_infos:
                 type: array
+                maxItems: 100
                 items:
                   $ref : "#/components/schemas/HawbInfo"
               mawb_info:      
@@ -655,6 +658,7 @@ components:
           $ref: "#/components/schemas/ShipmentPushMessageHeader"
         telemetries:
           type: array
+          maxItems: 1
           items:
             type: object
             properties:
@@ -759,6 +763,7 @@ components:
           maxLength: 255
         push_types:
           type: array
+          maxItems: 2
           items:
             type: string
             enum: [SHIPMENT,TELEMETRY]
@@ -793,6 +798,7 @@ components:
           example: "Message was successfully received."
         uids:
           type: array
+          maxItems: 1
           items:
             type: string 
             description: uuid reference
@@ -803,6 +809,7 @@ components:
           $ref: "#/components/schemas/ShipmentPushMessageHeader"
         telemetries:
               type: array
+              maxItems: 100
               items:
                 type: object
                 properties:
@@ -816,12 +823,14 @@ components:
           $ref: "#/components/schemas/ShipmentPushMessageHeader"
         shipments:
           type: array
+          maxItems: 100
           items:
             type: object
             description: ""
             properties:
               hawb_infos:
                 type: array
+                maxItems: 100
                 items:
                   $ref: "#/components/schemas/HawbInfo"
               mawb_info:
