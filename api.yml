@@ -107,6 +107,8 @@ paths:
           schema:
             type: string
             maxLength: 255
+            pattern: "[0-9a-fA-F]*"
+          
       responses:      
         '200':
           description: 'OK'
@@ -149,6 +151,7 @@ paths:
           schema:
             type: string
             maxLength: 512
+            format: "[0-9-,\\w]*"
       responses:
         '200':
           description: OK
