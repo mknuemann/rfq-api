@@ -184,7 +184,7 @@ paths:
           schema:
             type: string
       responses:
-        200:
+        '200':
           description: returns a response containing array of location telemetry data for requested mawb.
           content:
             application/json:
