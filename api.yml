@@ -90,6 +90,7 @@ paths:
           required: true
           schema:
             type: string
+            format: uuid
         - name: requestRefs
           in: query
           description: 'one or comma separated list of subscription reference ids, max 25 ids per request'
@@ -97,6 +98,7 @@ paths:
           required: false
           schema:
             type: string
+            format: uuid
         - name: shipmentKeys
           in: query
           description: 'one or comma separated list of shipment keys (mawb, hawb, shipper name), max 25 keys per request'
@@ -104,6 +106,7 @@ paths:
           required: false
           schema:
             type: string
+            maxLength: 255
       responses:      
         '200':
           description: 'OK'
@@ -138,12 +141,14 @@ paths:
           required: true
           schema:
             type: string
+            format: uuid
         - name: mawbs
           in: query
           description: 'one or comma separated list of MAWBs max 25 mawbs per request'
           required: true
           schema:
             type: string
+            maxLength: 512
       responses:
         '200':
           description: OK
