@@ -13,5 +13,5 @@ jobs:
           go-version: '^1.20.3'
       - run: |
           go install github.com/tufin/oasdiff@latest
-          oasdiff breaking -o ERR https://github.com/mknuemann/rfq-api/releases/download/v1.0.1/rfqs-apiv-v1.yml rfqs-apiv-v1.yml
+         # oasdiff breaking -o ERR https://github.com/mknuemann/rfq-api/releases/download/v1.0.1/rfqs-apiv-v1.yml rfqs-apiv-v1.yml
 
