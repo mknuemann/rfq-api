@@ -426,10 +426,12 @@ components:
           maxLength: 12
         movements:
           type: array
+          maxItems: 100
           items:
             $ref: "#/components/schemas/TelemetryMovement"
         iatas:
           type: array
+          maxItems: 100
           items:
             $ref: "#/components/schemas/TelemetryIata"
     TelemetryTypeLocation:
