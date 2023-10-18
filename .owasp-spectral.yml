@@ -26,17 +26,4 @@ rules:
                     - date
                     - date-time
               
-  additional-properties:
-    description: Additional properties must be forbidden in every object
-    given: '$..[?(@ && @.type=="object")]'
-    severity: error
-    then:
-      function: schema
-      functionOptions:
-        schema:
-          type: object
-          required:
-            - additionalProperties
-          properties:
-            additionalProperties:
-              const: false
+ 

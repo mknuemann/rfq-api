@@ -293,6 +293,7 @@ components:
         api_version:
           type: string
           example: '1.4'
+          maxLength: 10
     SubscriptionStatusResponse:
       type: object
       properties:
