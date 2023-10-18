@@ -60,7 +60,7 @@ paths:
                     schema:
                       $ref : "#/components/schemas/ShipmentPushMessage"
               responses:
-                200:
+                '200':
                   description: 'OK'
         TelemetryPush:
           '/telemetry/preconfiguredWebhookUrl':
@@ -73,7 +73,7 @@ paths:
                     schema:
                       $ref : "#/components/schemas/TelemetryPushMessage"
               responses:
-                200:
+                '200':
                   description: 'OK'
       security:
         - basic: []
