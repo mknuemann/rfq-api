@@ -1,0 +1,17 @@
+name: Lint Styleguide
+
+on:
+  - pull_request
+
+env:
+  RULES_VERSION: v7
+
+jobs:
+  Styleguide:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+      - run: npm install -g @stoplight/spectral-cli
+      - run: wget https://raw.githubusercontent.com/predic8/openapi-rules/$RULES_VERSION/spectral-styleguide.yml  --verbose  -O .spectral.yml
+      - run: spectral lint api.yml

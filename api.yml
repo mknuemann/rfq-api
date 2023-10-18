@@ -1,0 +1,869 @@
+openapi: 3.0.1
+info:
+  title: Shipment API
+  description: >
+    API to subscribe shipments at BlueBox Systems Api and retrieve and receive updates on shipment status via web services.
+    To use API contact your administrator to set up 
+  termsOfService: https://bluebox-systems.de/terms/
+  contact:
+    email: api-support@bluebox-systems.com
+  license:
+    name: BlueBox Systems GmbH
+    url: https://bluebox-systems.de/terms/
+  version: 1.4.0
+externalDocs:
+  description: Find out more about BlueBox Systems
+  url: https://bluebox-systems.com
+servers:
+  - url: 'https://api.bluebox-systems-uat.com/services'
+    description: Test
+  - url: 'https://api.bluebox-systems-air.com/services'
+    description: Production
+tags:
+  - name: Shipment
+    description: 'Shipment details related calls. Your starting point is shipment subscription.'
+paths:
+  /shipment/subscription:
+    post:
+      tags:
+        - Shipment
+      description: |
+        Subscribe for a shipment. Please note, the system stops tracking the shipment after it has not received any updates for 90days.
+
+        You can also opt-in for various push messages. We send updates to pre-configured Endpoints as follows:
+
+        - for 'shipment' push type: the system pushes batch of updates on shipments on fixed interval of 20 minutes including shipments with updates.
+        - for 'telemetry' push type: the system pushes batch of updates on telemetry on fixed interval of 10 minutes including shipments with updates.
+      requestBody:
+        description: 'The create subscription request'
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ShipmentSubscribeRequest'
+      responses:      
+        '200':
+          description: 'OK'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShipmentSubscribeResponse'
+      callbacks:
+        ShipmentPush:
+          '/shipment/preconfiguredWebhookUrl':
+            post:
+              description: 'The message is pushed to preconfigured Endpoint'
+              requestBody:
+                required: true
+                content:
+                  application/json:
+                    schema:
+                      $ref : "#/components/schemas/ShipmentPushMessage"
+              responses:
+                '200':
+                  description: 'OK'
+        TelemetryPush:
+          '/telemetry/preconfiguredWebhookUrl':
+            post:
+              description: 'The message is pushed to preconfigured Endpoint'
+              requestBody:
+                required: true
+                content:
+                  application/json:
+                    schema:
+                      $ref : "#/components/schemas/TelemetryPushMessage"
+              responses:
+                '200':
+                  description: 'OK'
+      security:
+        - basic: []
+    get: 
+      tags:
+        - Subscription
+      description: |
+        Get information about the status of your subscription by providing either the  UUID received on sending a subscription post, or by providing the shipment key mawb, hawb and shipper name.
+      parameters:
+        - name: accountId
+          in: query
+          description: 'uuid of your account'
+          example: '12345abc-def1-1231-bcd4-e5f6a7b8c9d0'
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: requestRefs
+          in: query
+          description: 'one or comma separated list of subscription reference ids, max 25 ids per request'
+          example: 'abcdef12-73e2-4227-9a33-00a31bde3d0d'
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - name: shipmentKeys
+          in: query
+          description: 'one or comma separated list of shipment keys (mawb, hawb, shipper name), max 25 keys per request'
+          example: '[{"mawb":"00111111111","hawb":"HAWB-00111111111","shipper":"TheShipper"}]'
+          required: false
+          schema:
+            type: string
+            maxLength: 255
+            pattern: "[0-9a-fA-F]*"
+          
+      responses:      
+        '200':
+          description: 'OK'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscriptionStatusResponse'
+        '400':
+          description: INVALID_REQUEST
+          content:
+            application/json:
+              schema:
+                $ref : '#/components/schemas/SubscriptionGetResponse'
+        '403':
+          description: UNAUTHORIZED
+          content:
+            application/json:
+              schema:
+                $ref : '#/components/schemas/SubscriptionGetResponse'
+      security:
+        - basic: []
+  /shipment/status:
+    get:
+      tags:
+        - Shipment
+      description: 'Get shipment details'
+      parameters:
+        - name: accountId
+          in: query
+          description: 'uuid of your account'
+          example: '12345abc-def1-1231-bcd4-e5f6a7b8c9d0'
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: mawbs
+          in: query
+          description: 'one or comma separated list of MAWBs max 25 mawbs per request'
+          required: true
+          schema:
+            type: string
+            maxLength: 512
+            format: "[0-9-,\\w]*"
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref : '#/components/schemas/ShipmentStatusResponse'
+        '400':
+          description: INVALID_REQUEST
+          content:
+            application/json:
+              schema:
+                $ref : '#/components/schemas/ShipmentGetResponse'
+        '403':
+          description: UNAUTHORIZED
+          content:
+            application/json:
+              schema:
+                $ref : '#/components/schemas/ShipmentGetResponse'
+      security:
+        - basic: []
+  /shipment/telemetry:
+    get:
+      tags:
+        - Shipment
+      parameters:
+        - name: accountId
+          in: query
+          description: 'uuid of your account'
+          example: '12345abc-def1-1231-bcd4-e5f6a7b8c9d0'
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: mawbs
+          in: query
+          description: 'one or comma separated list of MAWBs , max 25 mawbs per request'
+          required: true
+          schema:
+            type: string
+            maxLength: 1024
+            pattern: "[0-9,-\\w]*"
+      responses:
+        '200':
+          description: returns a response containing array of location telemetry data for requested mawb.
+          content:
+            application/json:
+              schema:
+                $ref : '#/components/schemas/ShipmentTelemetryResponse'
+        '400':
+          description: INVALID_REQUEST
+          content:
+            application/json:
+              schema:
+                $ref : '#/components/schemas/ShipmentGetResponse'
+        '403':
+          description: UNAUTHORIZED
+          content:
+            application/json:
+              schema:
+                $ref : '#/components/schemas/ShipmentGetResponse'
+      security:
+        - basic: []
+  /shipment/invitation:
+    get:
+      tags:
+        - Shipment
+      parameters:
+        - name: expiration
+          in: query
+          description: 'expiration date of the invitation links'
+          example: '2023-12-31'
+          required: false
+          schema:
+            type: string
+            format: date
+        - name: shipments
+          in: query
+          description: 'one or a comma separated list of shipment keys (mawb, hawb, shipper name, account_id), max 25 keys per request'
+          example: '[{"mawb":"00111111111","hawb":"HAWB-00111111111","shipper":"TheShipper","account_id":"12345abc-def1-1231-bcd4-e5f6a7b8c9d0"}]'
+          required: true
+          schema:
+            type: string
+            maxLength: 1024
+            pattern: ""
+      responses:
+        '200':
+          description: returns a response containing invitation link
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvitationResponse'
+        '400':
+          description: missing parameter or exceeding shipment limit
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: FORBIDDEN
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: invalid shipment
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: INTERNAL_SERVER_ERROR
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      security:
+        - basic: []        
+components:
+  schemas:
+    SubscriptionGetResponse:
+      type: object
+      required: [status,message]
+      properties:
+        status:
+          type: string
+          enum: ["400","403"]
+          description: |
+            Get response code
+
+            - 400: Requested too many shipments or invalid request params.
+            - 403: Access violation: no permission to get access to account : 12345abc-def1-1231-bcd4-e5f6a7b8c9d0
+        message:
+          type: string 
+          maxLength: 255
+          description: message describing the error
+          example: "Access violation: no permission to get access to account : 12345abc-def1-1231-bcd4-e5f6a7b8c9d0"
+    ShipmentPushMessageHeader:
+      type: object
+      properties: 
+        message_ts:
+          type: string
+          format: date-time
+          example: "2023-04-15T00:00:00Z"
+        api_version:
+          type: string
+          example: '1.4'
+          maxLength: 10
+    SubscriptionStatusResponse:
+      type: object
+      properties:
+        header:
+          $ref: "#/components/schemas/ShipmentPushMessageHeader"
+        subscriptions:
+          type: array
+          maxItems: 100
+          items:
+            type: object
+            properties:
+              account_id:
+                type: string
+                format: uuid
+                example: '12345abc-def1-1231-bcd4-e5f6a7b8c9d0'
+              subscription_reference:
+                type: string
+                format: uuid
+                description: uuid received upon subscription
+                example: 'abcdef12-73e2-4227-9a33-00a31bde3d0d'
+              mawb: 
+                type: string
+                maxLength: 12
+                example: '00111111111'
+              hawb: 
+                type: string
+                maxLength: 255
+                example: 'HAWB-00111111111'
+              shipper: 
+                type: string
+                maxLength: 255
+                example: 'TheShipper'
+              status:
+                type: number
+                enum: [100, 201, 202, 301, 302, 303, 404, 405, 406, 407]
+                description: |
+                  Status of subscription process
+                    The square bracket numbers indicate the priority level of the status. The lower the priority number, the higher the priority is. All status in one priority group are mutually exclusive, except for group 3, where the occurence timestamp orders the priority.
+                    * 100: OK[ony if no other status] - subscription successful
+                    * 201: UNSUPPORTED_CARRIER[2] - tracking probably unsupported
+                    * 202: DUPLICATE_SUBSCRIPTION[3] - subscribed already
+                    * 301: ACCOUNT_NOT_ALLOWED[2] - user has no permission to subscribe for account
+                    * 302: INVALID_JSON[2] - subscription was not parsable
+                    * 303: INVALID_MAWB[2] - mawb does not comply with mawb coding standard
+                    * 404: NOT_FOUND[4] - did not find subscription
+                    * 405: FOUND_SUBSCRIPTION_INCONSISTENT_SHIPMENT[2] - subscription was found, but shipment data is inconsistent
+                    * 406: SUB_DELETE_NOT_FOUND[3] - delete request was not matching any subscribed shipment
+                    * 407: SUB_UPDATE_NOT_FOUND[3] - update request was not matching any subscribed shipment
+              push_types:
+                type: array
+                maxItems: 2
+                items:
+                  type: string
+                  enum: [SHIPMENT,TELEMETRY]
+                  description: |
+                    Define what type of push updates you wish to receive or switch them off at all
+                  
+                      - shipment: shipment updates are provided to preconfigured Shipment Webhook
+                      - telemetry: telemetry updates are provided to preconfigured Telemetry Webhook
+                      - _null_: push updates are disabled
+              create_ts:
+                type: string
+                format: date-time
+                example: "2022-10-15T00:00:00Z"
+    RequestMessageHeader:
+      type: object
+      description: 'General container containing provisioning information.'
+      required: [account_id]
+      properties:
+        account_id:
+          type: string
+          format: uuid
+          description: uuid of your account
+          example: '12345abc-def1-1231-bcd4-e5f6a7b8c9d0'
+    TelemetryMovement:
+      type: object
+      properties:
+        dep_iata:
+          type: string
+          maxLength: 3
+          pattern: "[A-Z]{3}"
+          example: "DUS"
+        arr_iata:
+          type: string
+          maxLength: 3
+          pattern: "[A-Z]{3}"
+          example: "DUS"
+        flight_no:
+          type: string
+          maxLength: 10
+          example: "EY12"
+        mawb_flight_pieces:
+          type: integer
+          format: int32
+        mawb_flight_weight:
+          type: number
+          description: shipments weight on provided flight in kg  
+        vehicle_type: 
+          $ref: "#/components/schemas/VehicleType"
+        position: 
+          $ref: "#/components/schemas/TelemetryTypeLocation"
+    TelemetryIata:
+      type: object
+      properties:
+        iata:
+          type: string
+          maxLength: 3
+          pattern: "[A-Z]{3}"
+          example: "DUS"
+        position: 
+          type: object
+          properties:
+            lat:
+              type: number
+              format: double
+            lon:
+              type: number
+              format: double
+    Telemetry:
+      type: object
+      properties:
+        mawb:
+          type: string
+          maxLength: 12
+        movements:
+          type: array
+          maxItems: 100
+          items:
+            $ref: "#/components/schemas/TelemetryMovement"
+        iatas:
+          type: array
+          maxItems: 100
+          items:
+            $ref: "#/components/schemas/TelemetryIata"
+    TelemetryTypeLocation:
+      type: object
+      description: 'Location data. `location` is used as discriminator value'
+      properties:
+        lat:
+          type: number
+          format: double
+        lon:
+          type: number
+          format: double
+        alt:
+          type: integer
+          format: int32
+        heading:
+          type: integer
+          format: int32
+        g_speed:
+          type: integer
+          format: int32
+    Movement:
+      type: object
+      description: 'Physical movement from origin to destination of entire or partial shipment, currently replicating air movement'
+      properties:
+        dep_iata:
+          type: string
+          maxLength: 3
+          pattern: "[A-Z]{3}"
+          description: 'Origin IATA code'
+          example: 'DUS'
+        arr_iata:
+          type: string
+          maxLength: 3
+          pattern: "[A-Z]{3}"
+          description: 'Destination IATA code of this movement. This may not match the final destination iata of the shipment, i.e. if shipment was routed via different airport(s).'
+          example: 'DUS'
+        flight_no:
+          type: string
+          maxLength: 12
+          description: 'Flight Number'
+          example: 'EY12'
+        vehicle_type:
+          $ref: "#/components/schemas/VehicleType"
+        mawb_flight_pieces:
+          type: integer
+          format: int32
+        mawb_flight_weight:
+          type: number
+          description: shipments weight on provided flight in kg
+        bkd_ts:
+          type: string
+          format: date-time
+          description: BKD is a standard milestone. The field bkd_ts is the timestamp when this milestone was reached in UTC.  
+        rcf_ts:
+          type: string
+          format: date-time
+          description: RCF is a standard milestone when cargo is physically received at from flight. The field rcf_ts is the timestamp when this milestone was reached in UTC.
+        man_ts:
+          type: string
+          format: date-time
+          description: MAN is a standard milestone. The field man_ts is the timestamp when this milestone was reached in UTC.
+        act_departure_ts:
+          type: string
+          format: date-time
+        act_arrival_ts:
+          type: string
+          format: date-time
+        skd_departure_ts:
+          type: string
+          format: date-time
+        skd_departure_dt:
+          type: string
+          format: date
+        skd_arrival_ts:
+          type: string
+          format: date-time
+        est_departure_ts:
+          type: string
+          format: date-time
+        est_arrival_ts:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [BOOKED,IN_TRANSIT,ARRIVED]
+          description: |
+            The status progresses in given order, some may be skipped but the status never jumps back.
+
+            * BOOKED: cargo announced, this state is set from 'BKD' or 'MAN' milestone
+            * IN_TRANSIT: cargo has departed from `dep_iata`
+            * ARRIVED: cargo arrived at `arr_iata` of this movement, this state is set from 'RCF' or 'ARR' milestone
+    Shipment:
+      type: object
+      properties:
+        mawb:
+          type: string
+        org_iata: 
+          type: string
+          example: DUS
+          maxLength: 3
+          pattern: "[A-Z]{3}"
+        dst_iata:
+          type: string
+          maxLength: 3
+          pattern: "[A-Z]{3}"
+          example: DUS
+        mawb_total_pieces:
+          type: integer
+          format: int32
+          description: 'The total number of physical pieces in this shipment.'
+        mawb_total_weight:
+          type: number
+          format: double
+          description: the shipments weight provided in KG
+        rcs_ts:
+          type: string
+          format: date-time
+          description: RCS is a standard milestone when cargo and documents are physically received at the origin airport. The field rcs_ts is the timestamp when this milestone was reached in UTC.
+        rcs_pieces: 
+          type: integer
+          format: int32
+          description: RCS is a standard milestone when cargo and documents are received at the origin airport. The field rcs_pieces tells how many pieces arrived.
+        dlv_ts:
+          type: string
+          format: date-time
+          description: DLV is a standard milestone when the cargo is physically handed over to an agent or consignee at the destination airport.  The field dlv_ts is the timestamp of that event in UTC.
+        dlv_pieces: 
+          type: integer
+          format: int32
+          description: DLV is a standard milestone when the cargo is physically handed over to an agent or consignee at the destination airport.  The field dlv_pieces is the number of pieces.
+        status:
+          type: string
+          enum: [BOOKED,AIR_GATE_IN,PARTIALLY_IN_TRANSIT,IN_TRANSIT,PARTIALLY_ARRIVED,ARRIVED,PARTIALLY_AIR_GATE_OUT,AIR_GATE_OUT,ARCHIVED]
+          description: |
+            The status progresses in given order, some may be skipped but the status never jumps back.
+
+            * BOOKED: shipment announced
+            * AIR_GATE_IN: shipment and papers received from shipper
+            * PARTIALLY_IN_TRANSIT: at least one movement is in state 'IN_TRANSIT' or 'ARRIVED' and none with status 'ARRIVED' at shipment's final destination IATA.
+            * IN_TRANSIT: all movements are in state 'IN_TRANSIT' or 'ARRIVED' and none with status 'ARRIVED' at shipment's final destination IATA.
+            * PARTIALLY_ARRIVED: at least one movement is in status 'ARRIVED' at shipment's final destination IATA and the total number of pieces of all movements mismatches the shipments `shp_total_pieces`.
+            * ARRIVED: all movements are in status 'ARRIVED' at shipment's final destination IATA and the total number of pieces of all movements matches the shipments `shp_total_pieces`.
+            * PARTIALLY_AIR_GATE_OUT: shipment collected at shipment's final destination IATA having having total number of pieces collected mismatching the shipments `shp_total_pieces`.
+            * AIR_GATE_OUT: shipment collected at shipment's final destination IATA having total number of pieces collected matches the shipments `shp_total_pieces`.
+            * ARCHIVED: The shipment received last update more than 90 days ago.
+        status_ts:
+          type: string
+          format: date-time
+          description: the calculation time of provided status
+        movements:
+          type: array
+          maxItems: 30
+          items:
+            $ref : '#/components/schemas/Movement'
+    HawbInfo:
+      type: object
+      properties:
+        hawb:
+          type: string
+        shipper:
+          type: string
+        account_id:
+          type: string
+        customer_reference:
+          type: string
+          description: reference of consuming system
+        co2_emission:
+          type: object
+          properties:
+            value: 
+              type: number
+              format: double
+              description: emission in kg for this hawb
+              example: 2022.2
+        subscription_status:
+          type: object
+          properties:
+            status:
+                type: number
+                enum: [100, 201, 202, 301, 302, 303, 404, 405, 406, 407]
+                description: |
+                  Status of subscription process
+                    The square bracket numbers indicate the priority level of the status. The lower the priority number, the higher the priority is. All status in one priority group are mutually exclusive, except for group 3, where the occurence timestamp orders the priority.
+                    * 100: OK[ony if no other status] - subscription successful
+                    * 201: UNSUPPORTED_CARRIER[2] - tracking probably unsupported
+                    * 202: DUPLICATE_SUBSCRIPTION[3] - subscribed already
+                    * 301: ACCOUNT_NOT_ALLOWED[2] - user has no permission to subscribe for account
+                    * 302: INVALID_JSON[2] - subscription was not parsable
+                    * 303: INVALID_MAWB[2] - mawb does not comply with mawb coding standard
+                    * 404: NOT_FOUND[4] - did not find subscription
+                    * 405: FOUND_SUBSCRIPTION_INCONSISTENT_SHIPMENT[2] - subscription was found, but shipment data is inconsistent
+                    * 406: SUB_DELETE_NOT_FOUND[3] - delete request was not matching any subscribed shipment
+                    * 407: SUB_UPDATE_NOT_FOUND[3] - update request was not matching any subscribed shipment
+    ShipmentPushMessage:
+      type: object
+      description: 'This object is pushed to Shipment Endpoint when push has been enabled.'
+      properties:
+        header:
+          $ref: "#/components/schemas/ShipmentPushMessageHeader"
+        shipments:
+          type: array
+          maxItems: 1
+          items:
+            type: object
+            properties:
+              header:
+                type: object
+                properties: 
+                  message_ts:
+                    type: string
+                    format: date-time
+                    example: "2023-04-15T00:00:00Z"
+              hawb_infos:
+                type: array
+                maxItems: 100
+                items:
+                  $ref : "#/components/schemas/HawbInfo"
+              mawb_info:      
+                $ref : "#/components/schemas/Shipment"
+    TelemetryPushMessage:
+      type: object
+      description: 'This object is pushed to Telemetry Endpoint when push has been enabled.'
+      properties:
+        header:
+          $ref: "#/components/schemas/ShipmentPushMessageHeader"
+        telemetries:
+          type: array
+          maxItems: 1
+          items:
+            type: object
+            properties:
+              header:
+                type: object
+                properties: 
+                  message_ts:
+                    type: string
+                    format: date-time
+                    example: "2023-04-15T00:00:00Z"
+              telemetry_info:  
+               $ref : "#/components/schemas/Telemetry"
+    ShipmentSubscribeRequest:
+      type: object
+      required: [message_header, shipments]
+      properties:
+        message_header:
+          $ref: '#/components/schemas/RequestMessageHeader'
+        shipments:
+          type: array
+          maxLength: 25
+          items:
+            $ref: "#/components/schemas/ShipmentSubscription"
+    ShipmentSubscription:
+      type: object
+      description: 'Describes a shipment via the MAWB and its destination IATA'
+      required: ["mawb"]
+      properties:
+        mawb:
+          type: string
+          description: master airway bill  123-12345678 / 12312345678
+          maxLength: 255
+        hawb:
+          type: string
+          description: house airway bill
+          maxLength: 255
+        hawb_pieces:
+          type: integer
+          format: int32
+          description: number of pieces of house airway bill
+          example: 57
+        hawb_weight:
+          type: number
+          format: float
+          description: chargeable weight of pieces of house airway bill in KGM  
+          example: 350.5
+        customer_reference:
+          type: string
+          description: reference of consuming system
+          maxLength: 255
+        shipper:
+          type: string    
+          description: shipper name
+          maxLength: 255
+        shipper_ctr_cd:
+          type: string    
+          description: shipper country code
+          maxLength: 255
+        consignee:
+          type: string    
+          description: consignee name
+          maxLength: 255
+        consignee_ctr_cd:
+          type: string
+          description: consignee country code
+          maxLength: 255
+        pickup_city:
+          type: string
+          description: pickup city
+          maxLength: 255
+        pickup_locode:
+          type: string
+          description: pickup locode
+          maxLength: 255
+        pickup_location:
+          type: string
+          description: pickup location
+          maxLength: 255
+        est_pickup_dt:
+          type: string
+          format: date
+          description: estimated pickup date
+        delivery_city:
+          type: string
+          description: delivery city
+          maxLength: 255
+        delivery_locode:
+          type: string
+          description: delivery locode
+          maxLength: 255
+        delivery_location:
+          type: string
+          description: delivery location
+          maxLength: 255
+        est_delivery_dt:
+          type: string
+          format: date
+          description: estimated delivery date
+        forwarder:
+          type: string    
+          description: logistic forwarder name
+          maxLength: 255
+        push_types:
+          type: array
+          maxItems: 2
+          items:
+            type: string
+            enum: [SHIPMENT,TELEMETRY]
+            description: |
+              Define what type of push updates you wish to receive or switch them off at all
+            
+                - shipment: shipment updates are provided to preconfigured Shipment Webhook
+                - telemetry: telemetry updates are provided to preconfigured Telemetry Webhook
+                - _null_: push updates are disabled
+    ShipmentGetResponse:
+      type: object
+      required: [status,message]
+      properties:
+        status:
+          type: string
+          enum: ["400","403"]
+          description: |
+            Get response code
+
+            - 400: Requested too many shipments or invalid request params.
+            - 403: Access violation: no permission to get access to account : 12345abc-def1-1231-bcd4-e5f6a7b8c9d0
+        message:
+          type: string 
+          description: message describing the error
+          example: "Access violation: no permission to get access to account : 12345abc-def1-1231-bcd4-e5f6a7b8c9d0"
+    ShipmentSubscribeResponse:
+      type: object
+      required: [message]
+      properties:
+        message:
+          type: string
+          example: "Message was successfully received."
+        uids:
+          type: array
+          maxItems: 1
+          items:
+            type: string 
+            description: uuid reference
+    ShipmentTelemetryResponse:
+      type: object
+      properties:
+        header:
+          $ref: "#/components/schemas/ShipmentPushMessageHeader"
+        telemetries:
+              type: array
+              maxItems: 100
+              items:
+                type: object
+                properties:
+                  telemetry_info:
+                    $ref: '#/components/schemas/Telemetry'    
+        
+    ShipmentStatusResponse:
+      type: object
+      properties:
+        header:
+          $ref: "#/components/schemas/ShipmentPushMessageHeader"
+        shipments:
+          type: array
+          maxItems: 100
+          items:
+            type: object
+            description: ""
+            properties:
+              hawb_infos:
+                type: array
+                maxItems: 100
+                items:
+                  $ref: "#/components/schemas/HawbInfo"
+              mawb_info:
+                $ref: "#/components/schemas/Shipment"
+    VehicleType: 
+            type: string
+            enum: ["P1","T1"]
+            description: |
+              Type of the vehicle
+              * 1: plain
+              * 2: truck
+    InvitationResponse:
+      type: object
+      properties:
+        header:
+          $ref: "#/components/schemas/ShipmentPushMessageHeader"
+        invitation:
+          type: object
+          properties:
+            url:
+              type: string
+              description: "url that can be distributed to view shipment status"
+              example: 'https://bluebox-air.business-code-demo.de/shipmentOverview?token=cbfbdbf4-cddb-4a38-840a-9cecfb05f983'
+    ErrorResponse:
+      type: object
+      properties:
+        errorMessage:
+          type: string
+          description: error description and error reference id
+          example: "Missing input parameters for mawbs or accountId Error-Id: ea5d1f38-98da-421b-bfa9-b31bd4122f2f"
+  securitySchemes:
+    basic:
+      type: http
+      scheme: basic
