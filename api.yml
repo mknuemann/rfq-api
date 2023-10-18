@@ -570,7 +570,7 @@ components:
               type: number
               format: double
               description: emission in kg for this hawb
-              example: "2022.2"
+              example: 2022.2
         subscription_status:
           type: object
           properties:
