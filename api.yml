@@ -380,10 +380,12 @@ components:
         dep_iata:
           type: string
           maxLength: 3
+          pattern: "[A-Z]{3}"
           example: "DUS"
         arr_iata:
           type: string
           maxLength: 3
+          pattern: "[A-Z]{3}"
           example: "DUS"
         flight_no:
           type: string
@@ -405,6 +407,7 @@ components:
         iata:
           type: string
           maxLength: 3
+          pattern: "[A-Z]{3}"
           example: "DUS"
         position: 
           type: object
@@ -455,11 +458,13 @@ components:
         dep_iata:
           type: string
           maxLength: 3
+          pattern: "[A-Z]{3}"
           description: 'Origin IATA code'
           example: 'DUS'
         arr_iata:
           type: string
           maxLength: 3
+          pattern: "[A-Z]{3}"
           description: 'Destination IATA code of this movement. This may not match the final destination iata of the shipment, i.e. if shipment was routed via different airport(s).'
           example: 'DUS'
         flight_no:
@@ -525,8 +530,12 @@ components:
         org_iata: 
           type: string
           example: DUS
+          maxLength: 3
+          pattern: "[A-Z]{3}"
         dst_iata:
           type: string
+          maxLength: 3
+          pattern: "[A-Z]{3}"
           example: DUS
         mawb_total_pieces:
           type: integer
