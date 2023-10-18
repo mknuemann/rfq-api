@@ -391,6 +391,7 @@ components:
           example: "EY12"
         mawb_flight_pieces:
           type: integer
+          format: int32
         mawb_flight_weight:
           type: number
           description: shipments weight on provided flight in kg  
@@ -470,6 +471,7 @@ components:
           $ref: "#/components/schemas/VehicleType"
         mawb_flight_pieces:
           type: integer
+          format: int32
         mawb_flight_weight:
           type: number
           description: shipments weight on provided flight in kg
@@ -682,6 +684,7 @@ components:
           maxLength: 255
         hawb_pieces:
           type: integer
+          format: int32
           description: number of pieces of house airway bill
           example: 57
         hawb_weight:
